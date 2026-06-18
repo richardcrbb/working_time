@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "working_time (Web Remoto Puerto 8080)",
+            "request": "launch",
+            "type": "flutter",
+            "args": [
+                "-d=web-server",
+                "--web-port=8080",
+                "--web-hostname=0.0.0.0"
+            ]
+        },
+        {
+            "name": "working_time",
+            "request": "launch",
+            "type": "flutter"
+        },
+        {
+            "name": "working_time (profile mode)",
+            "request": "launch",
+            "type": "flutter",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "working_time (release mode)",
+            "request": "launch",
+            "type": "flutter",
+            "flutterMode": "release"
+        }
+    ]
+}

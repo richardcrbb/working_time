@@ -1,7 +1,11 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:working_time/db/models.dart';
 import 'package:working_time/db/notifiers.dart';
+
 
 class MyDatabase {
   //!                       singleton --> unica conexion
@@ -18,8 +22,20 @@ class MyDatabase {
   //esto usa el paquete sqflite para ejecutar la funcion openDatabase
   //para usar esta funcion se necesita el path de la db, para ello se usa el paquete path.
   static Future<Database> _initDB()async{
-    final String dbPath = await getDatabasesPath();
-    final String path = join(dbPath,'working_hours.db');
+    
+    String path; 
+    
+    //Configurar el factory para Web usando WebAssembly
+    if(kIsWeb){
+      databaseFactory=databaseFactoryFfiWeb;
+      path='working_hours.db';
+      }
+    //Configurar para Android (usa el factory por defecto)
+    else{
+      final String dbPath = await getDatabasesPath();
+      path = join(dbPath,'working_hours.db');
+      }
+    
     
     return await openDatabase(
       path,
@@ -27,8 +43,8 @@ class MyDatabase {
       onConfigure: (db) {
         
       },
-      onCreate: (db, version) {
-        db.execute('''
+      onCreate: (db, version) async {
+        await db.execute('''
           CREATE TABLE timesheet(
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           location TEXT,
@@ -40,19 +56,19 @@ class MyDatabase {
           );'''
 
         );
-        db.execute('''
+        await db.execute('''
           CREATE TABLE locationsTable(
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           location TEXT,
           regularPayment REAL,
           overtimePayment REAL
           )''');
-        db.execute('''
+        await db.execute('''
           CREATE TABLE filterFrequency(
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           frequency TEXT
           )''');
-        db.insert(
+        await db.insert(
           'filterFrequency',
           {'frequency':'Biweekly'},
           conflictAlgorithm: ConflictAlgorithm.replace
@@ -262,18 +278,20 @@ class MyDatabase {
           filterEndDay=DateTime(sixteen.year,sixteen.month-offsetScope,sixteen.day);
         }
         else {
-          filterEndDay=DateTime(sixteen.year,sixteen.month-offsetScope,sixteen.day);
-          filterStartDay=DateTime(lastOfMonth.year,lastOfMonth.month-offsetScope,lastOfMonth.day);
+          filterStartDay=DateTime(sixteen.year,sixteen.month-offsetScope,sixteen.day);
+          filterEndDay=DateTime(lastOfMonth.year,lastOfMonth.month-offsetScope,lastOfMonth.day);
         }
       }
       else if (offset%2==1){
 
-        int offsetScope2 = offset~/2+1; // first biweek goes back last month (use floor division)
-        int offsetScope3 = offset~/2;    //second biweek remains in the same month (use floor division)
+        int offsetScope2 = offset~/2+1; // first biweek: goes back last month (use floor division)
+        int offsetScope3 = offset~/2;    //second biweek: remains in the same month (use floor division)
+        //first biweek
         if(today.day<16){
           filterStartDay=DateTime(sixteen.year,sixteen.month-offsetScope2,sixteen.day);
           filterEndDay=DateTime(lastOfMonth.year,lastOfMonth.month-offsetScope2,lastOfMonth.day);
         }
+        //second biweek
         else{
           filterStartDay=DateTime(firstOfMonth.year,firstOfMonth.month-offsetScope3,firstOfMonth.day);
           filterEndDay=DateTime(sixteen.year,sixteen.month-offsetScope3,sixteen.day);

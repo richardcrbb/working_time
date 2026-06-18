@@ -140,25 +140,20 @@ Future<DateTime?> selectTimeFunc(BuildContext context, DateTime initialDateAndTi
   return await showModalBottomSheet<DateTime>(
     context: context,
     builder: (context) {
-      return SizedBox(
-        height: 900,
-        child: Column(
-          children: [
-
-            SizedBox(height: 350,
-              child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.dateAndTime,
-                  onDateTimeChanged: (value) {
-                    selected = value;
-                  },
-                  initialDateTime: selected,
-                  use24hFormat: true,
-                ),
-            ),
-
-            SizedBox(height: 25,),
-
-            Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(height: 249,
+            child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.dateAndTime,
+                onDateTimeChanged: (value) {
+                  selected = value;
+                },
+                initialDateTime: selected,
+                use24hFormat: true,
+              ),
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
               onPressed: () => Navigator.pop(context),
@@ -170,11 +165,9 @@ Future<DateTime?> selectTimeFunc(BuildContext context, DateTime initialDateAndTi
               icon: Icon(Icons.check_circle_rounded),
               iconSize: 50,
               ),
-            ],),
-            
-            SizedBox(height: 25,),
-          ],
-        ),
+            ],
+          ),
+        ],
       );
     },
   );

@@ -55,9 +55,10 @@ class _HomeState extends State<Home> {
               for (Map element in snapshot.data!) { totalCAD += element['total_pay'];}
               
               return Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
-                    height: 300,
+                    height: 275,
                     child: Stack(
                       children: [
                         PieChart(PieChartData(
@@ -122,24 +123,29 @@ class _HomeState extends State<Home> {
                       ]//list of stack
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(onPressed: () async {
-                        List listlocal = await MyDatabase.getFilteredRegistries(periodOffset+1);
-                        if (listlocal.isEmpty){periodOffset=0;settingsNotifier.value++;}
-                        else{ periodOffset++; settingsNotifier.value++;}
-                      },
-                       icon: Icon(Icons.arrow_back_ios,),style: IconButton.styleFrom( visualDensity: VisualDensity.compact),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(onPressed: () async {
+                            List listlocal = await MyDatabase.getFilteredRegistries(periodOffset+1);
+                            if (listlocal.isEmpty){periodOffset=0;settingsNotifier.value++;}
+                            else{ periodOffset++; settingsNotifier.value++;}
+                          },
+                           icon: Icon(Icons.arrow_back_ios,),style: IconButton.styleFrom( visualDensity: VisualDensity.compact),
+                          ),
+                          Column(children: [
+                            Text('You made \$${totalCAD==0 ? '_' : totalCAD} CAD from:',style: titulo,),
+                            Text('${dateToMyOwnFormat(filterStartDay)} to ${dateToMyOwnFormat(filterEndDay)}')
+                          ],),
+                          IconButton(onPressed: () {if(periodOffset>0){periodOffset--; settingsNotifier.value++;}
+                          }, icon: Icon(Icons.arrow_forward_ios), style: IconButton.styleFrom(visualDensity: VisualDensity.compact),color: periodOffset==0? Colors.grey.shade400:null,)
+                        ],
                       ),
-                      Column(children: [
-                        Text('You made \$${totalCAD==0 ? '_' : totalCAD} CAD from:',style: titulo,),
-                        Text('${dateToMyOwnFormat(filterStartDay)} to ${dateToMyOwnFormat(filterEndDay)}')
-                      ],),
-                      IconButton(onPressed: () {if(periodOffset>0){periodOffset--; settingsNotifier.value++;}
-                      }, icon: Icon(Icons.arrow_forward_ios), style: IconButton.styleFrom(visualDensity: VisualDensity.compact),color: periodOffset==0? Colors.grey.shade400:null,)
-                    ],
+                    ),
                   ),
                 ],
               ) ;
@@ -192,54 +198,56 @@ class _HomeState extends State<Home> {
               myOrderedList=myOrderedList.reversed.toList();
               
               
-              //widgetsubt
-              return Column(children: [
-                SizedBox(height: 260,child: BarChart(
-                  BarChartData(
-                    barGroups:  myOrderedList.asMap().entries.map((e) {
-                      int index = e.key;
-                      double pay = e.value.value;
-                
-                      return BarChartGroupData(
-                        x: index,
-                        barRods: [BarChartRodData(toY: pay)],
-                        //showingTooltipIndicators: 
-                        );
-                    },).toList(),
-                     //maxY: 3000,
-                    titlesData: FlTitlesData(
-                      rightTitles: const AxisTitles(),
-                      topTitles: const AxisTitles(),
-                      leftTitles: AxisTitles(
-                        sideTitleAlignment: SideTitleAlignment.outside,
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 40,
-                          maxIncluded: false,
-                          minIncluded: false,
-                        ),
-                      ),
-                      bottomTitles:  AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 40,
-                          getTitlesWidget: (value, meta){
-                            return SideTitleWidget(
-                              angle: 4.71239,
-                              meta: meta,
-                              child: Text(
-                                myOrderedList[int.parse(meta.formattedValue)].key
-                              ),
-                            );
-                          }
-                        ),
-                      ),
-                    )
-                
+              //widgetsubtree
+              return SingleChildScrollView(
+                child: Column(children: [
+                  SizedBox(height: 260,child: BarChart(
+                    BarChartData(
+                      barGroups:  myOrderedList.asMap().entries.map((e) {
+                        int index = e.key;
+                        double pay = e.value.value;
                   
-                  ),
-                ),)
-              ],);
+                        return BarChartGroupData(
+                          x: index,
+                          barRods: [BarChartRodData(toY: pay)],
+                          //showingTooltipIndicators: 
+                          );
+                      },).toList(),
+                       //maxY: 3000,
+                      titlesData: FlTitlesData(
+                        rightTitles: const AxisTitles(),
+                        topTitles: const AxisTitles(),
+                        leftTitles: AxisTitles(
+                          sideTitleAlignment: SideTitleAlignment.outside,
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 40,
+                            maxIncluded: false,
+                            minIncluded: false,
+                          ),
+                        ),
+                        bottomTitles:  AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 40,
+                            getTitlesWidget: (value, meta){
+                              return SideTitleWidget(
+                                angle: 4.71239,
+                                meta: meta,
+                                child: Text(
+                                  myOrderedList[int.parse(meta.formattedValue)].key
+                                ),
+                              );
+                            }
+                          ),
+                        ),
+                      )
+                  
+                    
+                    ),
+                  ),)
+                ],),
+              );
             }
           ),)
       ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 //import 'package:google_fonts/google_fonts.dart';
 import './db/notifiers.dart';
 import './screens/settings.dart';
@@ -26,6 +27,12 @@ class MyApp extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: isDarkModeNotifier,
       builder:(context, bool isDarkMode,_){return MaterialApp(
+        builder: (context, child) {
+          final mediaQueryData = MediaQuery.of(context);
+          return MediaQuery(data: mediaQueryData.copyWith(
+            textScaler: mediaQueryData.textScaler.clamp(maxScaleFactor: 1.0)
+          ), child: child?? const Placeholder());
+        },
         debugShowCheckedModeBanner: false,
         themeMode: isDarkMode? ThemeMode.dark:ThemeMode.light,
         theme: ThemeData(
@@ -46,7 +53,7 @@ class MyApp extends StatelessWidget {
             centerTitle: true,
             actions: [
               IconButton(
-                onPressed: (){isDarkMode? isDarkModeNotifier.value=false:isDarkModeNotifier.value=true;}, 
+                onPressed: (){isDarkModeNotifier.value=!isDarkMode;}, 
                 icon: isDarkMode? Icon(Icons.light_mode_rounded):Icon(Icons.dark_mode)
               ),
               Builder(builder: (context) {
@@ -58,13 +65,16 @@ class MyApp extends StatelessWidget {
               );},)
             ],
           ),
-          body: Padding(
-                padding: EdgeInsetsDirectional.symmetric(horizontal: 20),
-                child: ValueListenableBuilder(valueListenable: settingsNotifier, builder: (_, settingsNotifierValue, _) {
-                  return KeyedSubtree(
-                    key: ValueKey(settingsNotifierValue),//reconstruye los estados cuando cambia el notifier.
-                    child: pages[selectedIndex]);
-                },),),
+          body: Center(
+            child: Container(
+                  constraints: BoxConstraints(maxWidth: 450),
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 20),
+                  child: ValueListenableBuilder(valueListenable: settingsNotifier, builder: (_, settingsNotifierValue, _) {
+                    return KeyedSubtree(
+                      key: ValueKey(settingsNotifierValue),//reconstruye los estados cuando cambia el notifier.
+                      child: pages[selectedIndex]);
+                  },),),
+          ),
           bottomNavigationBar: NavigationBar(destinations: [
                         NavigationDestination(icon: Icon(Icons.home_work_rounded), label: 'Home'),
                         NavigationDestination(icon: Icon(Icons.article_outlined), label: 'Logbook'),

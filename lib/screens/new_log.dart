@@ -95,21 +95,11 @@ class _NewLogState extends State<NewLog> {
                       controller: startControllerEdited,
                       decoration: InputDecoration(hintText: 'Select Start Time'),
                       readOnly: true,
+                      onTap: selectTimeCallBack,
                     ),
             ),
             SizedBox(width: 10,),
-            IconButton(onPressed: () async{
-              DateTime? result = await selectTimeFunc(context,initialDateAndTime);
-                if(result != null){
-                  initialDateAndTime = result;
-                  setState((){
-                    startControllerEdited.text = dateToMyOwnFormat(initialDateAndTime);
-                    });
-                    if(durationSelectedinHours!=null){
-                      endDateAndTime = initialDateAndTime.add(durationSelected);
-                    }
-                }
-              },
+            IconButton(onPressed: selectTimeCallBack,
               icon: Icon(Icons.timelapse)
             ),
           ],
@@ -122,20 +112,10 @@ class _NewLogState extends State<NewLog> {
               readOnly: true,
               textAlign: TextAlign.center,
               decoration: InputDecoration(hintText: 'Select Hours Worked',),
+              onTap: selectHoursCallBack,
               ),
           ),
-          IconButton(onPressed: () async{
-            Duration? result = await hoursWorkedFunc(context,durationSelected);
-                if(result != null){
-                  durationSelected=result;
-                  durationSelectedinHours=(result.inMinutes/60).toDouble();
-                  endDateAndTime = initialDateAndTime.add(durationSelected);
-                  calculateDayPay();
-                  setState((){
-                    hoursWorkedController.text = durationToMyOwnFormat(durationSelectedinHours!);
-                    });
-                }
-          }, icon: Icon(Icons.timelapse))
+          IconButton(onPressed: selectHoursCallBack, icon: Icon(Icons.timelapse))
           ],
         ),
         //! isExtraTime Switch Tile
@@ -258,7 +238,36 @@ class _NewLogState extends State<NewLog> {
     }
   }
 
+  //!           Select Start Callback
 
+  void selectTimeCallBack () async{
+    DateTime? result = await selectTimeFunc(context,initialDateAndTime);
+    if(result != null){
+      initialDateAndTime = result;
+      setState((){
+        startControllerEdited.text = dateToMyOwnFormat(initialDateAndTime);
+        });
+        if(durationSelectedinHours!=null){
+          endDateAndTime = initialDateAndTime.add(durationSelected);
+      }
+    }
+  }
+
+
+  //!           Select Hours Callback
+
+  void selectHoursCallBack () async{
+    Duration? result = await hoursWorkedFunc(context,durationSelected);
+    if(result != null){
+      durationSelected=result;
+      durationSelectedinHours=(result.inMinutes/60).toDouble();
+      endDateAndTime = initialDateAndTime.add(durationSelected);
+      calculateDayPay();
+      setState((){
+        hoursWorkedController.text = durationToMyOwnFormat(durationSelectedinHours!);
+        });
+    }
+  }
 
   //! Save HoursLog
 
